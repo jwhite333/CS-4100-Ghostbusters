@@ -75,7 +75,12 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        total = self.total()
+        if total == 0:
+            return
+
+        for key in self.keys():
+            self[key] = self[key] / total
 
     def sample(self):
         """
@@ -99,7 +104,16 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        dictCopy = self.copy()
+        dictCopy.normalize()
+
+        randomValue = random.random()
+        sumTotal = 0
+        for key in dictCopy.keys():
+            sumTotal += dictCopy[key]
+
+            if sumTotal > randomValue:
+                return key
 
 
 class InferenceModule:
@@ -169,7 +183,15 @@ class InferenceModule:
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        ghostInJail = True if ghostPosition == jailPosition else False
+        if ghostInJail and noisyDistance is None:
+            return 1.0
+        elif ghostInJail and noisyDistance is not None:
+            return 0.0
+        elif not ghostInJail and noisyDistance is None:
+            return 0.0
+        else:
+            return busters.getObservationProbability(noisyDistance, manhattanDistance(pacmanPosition, ghostPosition))
 
     def setGhostPosition(self, gameState, ghostPosition, index):
         """
@@ -277,7 +299,10 @@ class ExactInference(InferenceModule):
         position is known.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        for (x, y) in self.allPositions:
+            observedLikelihood = self.getObservationProb(observation, gameState.getPacmanPosition(), (x, y), self.getJailPosition())
+            currentLikelihood = self.beliefs[(x, y)]
+            self.beliefs[(x, y)] = currentLikelihood * observedLikelihood
 
         self.beliefs.normalize()
 
