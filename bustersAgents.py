@@ -18,6 +18,8 @@ from game import Directions
 from keyboardAgents import KeyboardAgent
 import inference
 import busters
+from math import inf
+from copy import copy
 
 class NullGraphics:
     "Placeholder for graphics"
@@ -138,9 +140,31 @@ class GreedyBustersAgent(BustersAgent):
         Pacman closest to the closest ghost (according to mazeDistance!).
         """
         pacmanPosition = gameState.getPacmanPosition()
-        legal = [a for a in gameState.getLegalPacmanActions()]
+        legalActions = [a for a in gameState.getLegalPacmanActions()]
         livingGhosts = gameState.getLivingGhosts()
         livingGhostPositionDistributions = \
             [beliefs for i, beliefs in enumerate(self.ghostBeliefs)
              if livingGhosts[i+1]]
         "*** YOUR CODE HERE ***"
+
+        # Select one best choice for each ghost's position
+        mostLikelyPositions = []
+        for distribution in livingGhostPositionDistributions:
+            highestLikelihood = max(distribution.values())
+            mostLikelyPosition = [key for key, value in distribution.items() if value == highestLikelihood]
+            if isinstance(mostLikelyPosition, list):
+                mostLikelyPosition = mostLikelyPosition[0]
+            mostLikelyPositions.append(mostLikelyPosition)
+
+        # Select the action bringing us closest to any best choice location
+        bestAction = None
+        closestGhost = inf
+        for action in legalActions:
+            newPosition = Actions.getSuccessor(pacmanPosition, action)
+            for ghostPosition in mostLikelyPositions:
+                distance = self.distancer.getDistance(newPosition, ghostPosition)
+                if distance < closestGhost:
+                    closestGhost = distance
+                    bestAction = copy(action)
+        return bestAction
+
