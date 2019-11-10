@@ -18,6 +18,7 @@ import busters
 import game
 
 from util import manhattanDistance, raiseNotDefined
+from copy import copy
 
 
 class DiscreteDistribution(dict):
@@ -353,7 +354,10 @@ class ParticleFilter(InferenceModule):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        particlesPerPosition = int(self.numParticles / len(self.legalPositions))
+        for position in self.legalPositions:
+            positionCopy = copy(position)
+            self.particles.extend([positionCopy for _ in range(0, particlesPerPosition)])
 
     def observeUpdate(self, observation, gameState):
         """
@@ -387,8 +391,10 @@ class ParticleFilter(InferenceModule):
         This function should return a normalized distribution.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
-
+        distribution = {}
+        for position in self.allPositions:
+            distribution[position] = self.particles.count(position) / self.numParticles
+        return DiscreteDistribution(distribution)
 
 class JointParticleFilter(ParticleFilter):
     """
