@@ -105,13 +105,10 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-        dictCopy = self.copy()
-        dictCopy.normalize()
-
-        randomValue = random.random()
+        randomValue = random.random() * self.total()
         sumTotal = 0
-        for key in dictCopy.keys():
-            sumTotal += dictCopy[key]
+        for key in self.keys():
+            sumTotal += self[key]
 
             if sumTotal > randomValue:
                 return key
@@ -372,7 +369,22 @@ class ParticleFilter(InferenceModule):
         the DiscreteDistribution may be useful.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        distribution = {}
+        for particle in self.particles:
+            likelihood = self.getObservationProb(observation, gameState.getPacmanPosition(), particle, self.getJailPosition())
+            try:
+                distribution[particle] += likelihood
+            except KeyError:
+                distribution[particle] = likelihood
+
+        distribution = DiscreteDistribution(distribution)
+        if distribution.total() != 0:
+            newParticlesList = []
+            for _ in range(0, len(self.particles)):
+                newParticlesList.append(distribution.sample())
+            self.particles = newParticlesList
+        else:
+            self.initializeUniformly(gameState)
 
     def elapseTime(self, gameState):
         """
