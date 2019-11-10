@@ -408,9 +408,14 @@ class ParticleFilter(InferenceModule):
         """
         "*** YOUR CODE HERE ***"
         distribution = {}
-        for position in self.allPositions:
-            distribution[position] = self.particles.count(position) / self.numParticles
-        return DiscreteDistribution(distribution)
+        for particle in self.particles:
+            try:
+                distribution[particle] = distribution[particle] + 1
+            except KeyError:
+                distribution[particle] = 1
+        distribution = DiscreteDistribution(distribution)
+        distribution.normalize()
+        return distribution
 
 class JointParticleFilter(ParticleFilter):
     """
@@ -437,7 +442,13 @@ class JointParticleFilter(ParticleFilter):
         """
         self.particles = []
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        ghostCount = gameState.getNumAgents() - 1
+        jointPositions = list(itertools.product(self.legalPositions, repeat=ghostCount))
+        random.shuffle(jointPositions)
+        particlesPerPosition = int(self.numParticles / len(jointPositions))
+        for jointPosition in jointPositions:
+            self.particles.extend([jointPosition for _ in range(0, particlesPerPosition)])
+
 
     def addGhostAgent(self, agent):
         """
