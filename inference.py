@@ -481,7 +481,24 @@ class JointParticleFilter(ParticleFilter):
         the DiscreteDistribution may be useful.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        distribution = {}
+        for particle in self.particles:
+            likelihood = 1
+            for ghostIndex, noisyDistance in enumerate(observation):
+                likelihood = likelihood * self.getObservationProb(noisyDistance, gameState.getPacmanPosition(), particle[ghostIndex], self.getJailPosition(ghostIndex))
+            try:
+                distribution[particle] += likelihood
+            except KeyError:
+                distribution[particle] = likelihood
+
+        distribution = DiscreteDistribution(distribution)
+        if distribution.total() != 0:
+            newParticlesList = []
+            for _ in range(0, len(self.particles)):
+                newParticlesList.append(distribution.sample())
+            self.particles = newParticlesList
+        else:
+            self.initializeUniformly(gameState)
 
     def elapseTime(self, gameState):
         """
