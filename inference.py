@@ -445,10 +445,9 @@ class JointParticleFilter(ParticleFilter):
         ghostCount = gameState.getNumAgents() - 1
         jointPositions = list(itertools.product(self.legalPositions, repeat=ghostCount))
         random.shuffle(jointPositions)
-        particlesPerPosition = int(self.numParticles / len(jointPositions))
-        for jointPosition in jointPositions:
-            self.particles.extend([jointPosition for _ in range(0, particlesPerPosition)])
-
+        particlesPerPosition = max(1, int(self.numParticles / len(jointPositions)))
+        for positionIndex in range(min(self.numParticles, len(jointPositions))):
+            self.particles.extend([jointPositions[positionIndex] for _ in range(0, particlesPerPosition)])
 
     def addGhostAgent(self, agent):
         """
@@ -513,27 +512,18 @@ class JointParticleFilter(ParticleFilter):
                 continue
             # now loop through and update each entry in newParticle...
             "*** YOUR CODE HERE ***"
-            for _ in range(self.particles.count(oldParticle):)
-                newParticle = list(oldParticle)
-                for i in range(self.numGhosts):
-                    oldPositions = list(oldParticle)
-                    distribution = self.getPositionDistribution(gameState, oldPositions, i, self.ghostAgents[i])
-                    newParticle[i] = distribution.sample()
-                newParticles.append(tuple(newParticle))
-            # for ghostIndex, position in enumerate(oldParticle):
-                # distribution = self.getPositionDistribution(gameState, list(oldParticle), ghostIndex, self.ghostAgents[ghostIndex])
-                # newParticle[ghostIndex] = distribution.sample()
+            distributions = []
+            samples = []
+            for i in range(self.numGhosts):
+                distributions.append(self.getPositionDistribution(gameState, list(oldParticle), i, self.ghostAgents[i]))
 
-            # old 
-            # newParticleList = []
-            # for position in self.allPositions:
-            #     distribution = self.getPositionDistribution(gameState, position)
-            #     for _ in range(self.particles.count(position)):
-            #         newParticleList.append(distribution.sample())
-            # self.particles = newParticleList
+            for _ in range(self.particles.count(oldParticle)):
+                samples.append([distributions[i].sample() for i in range(self.numGhosts)])
+
             lastParticle = oldParticle
             """*** END YOUR CODE HERE ***"""
-            newParticles.append(tuple(newParticle))
+            for particle in samples:
+                newParticles.append(tuple(particle))
         self.particles = newParticles
 
 
