@@ -506,13 +506,32 @@ class JointParticleFilter(ParticleFilter):
         gameState.
         """
         newParticles = []
+        lastParticle = None
+        self.particles.sort()
         for oldParticle in self.particles:
-            newParticle = list(oldParticle)  # A list of ghost positions
-
+            if oldParticle == lastParticle:
+                continue
             # now loop through and update each entry in newParticle...
             "*** YOUR CODE HERE ***"
-            raiseNotDefined()
+            for _ in range(self.particles.count(oldParticle):)
+                newParticle = list(oldParticle)
+                for i in range(self.numGhosts):
+                    oldPositions = list(oldParticle)
+                    distribution = self.getPositionDistribution(gameState, oldPositions, i, self.ghostAgents[i])
+                    newParticle[i] = distribution.sample()
+                newParticles.append(tuple(newParticle))
+            # for ghostIndex, position in enumerate(oldParticle):
+                # distribution = self.getPositionDistribution(gameState, list(oldParticle), ghostIndex, self.ghostAgents[ghostIndex])
+                # newParticle[ghostIndex] = distribution.sample()
 
+            # old 
+            # newParticleList = []
+            # for position in self.allPositions:
+            #     distribution = self.getPositionDistribution(gameState, position)
+            #     for _ in range(self.particles.count(position)):
+            #         newParticleList.append(distribution.sample())
+            # self.particles = newParticleList
+            lastParticle = oldParticle
             """*** END YOUR CODE HERE ***"""
             newParticles.append(tuple(newParticle))
         self.particles = newParticles
